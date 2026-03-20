@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文章 | 光影记</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600&family=Cormorant+Garamond:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- 导航 -->
+    <nav class="nav">
+        <div class="nav-inner">
+            <a href="index.html" class="logo">光影记</a>
+            <ul class="nav-links">
+                <li><a href="index.html">作品</a></li>
+                <li><a href="articles.html" class="active">文章</a></li>
+                <li><a href="about.html">关于</a></li>
+                <li><a href="contact.html">联系</a></li>
+            </ul>
+            <button class="mobile-menu-btn" aria-label="菜单">
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- 移动端菜单 -->
+    <div class="mobile-menu">
+        <a href="index.html">作品</a>
+        <a href="articles.html">文章</a>
+        <a href="about.html">关于</a>
+        <a href="contact.html">联系</a>
+    </div>
+
+    <!-- 文章内容 -->
+    <article class="article-page" id="articlePage">
+        <p class="loading" style="text-align: center; color: var(--text-secondary);">加载中...</p>
+    </article>
+
+    <!-- 评论 -->
+    <section class="comments-section" id="commentsSection" style="display: none;">
+        <div class="comments-header">
+            <h3>评论</h3>
+            <span id="commentCount">0 条评论</span>
+        </div>
+        
+        <!-- 评论表单 -->
+        <form class="comment-form" id="commentForm">
+            <input type="text" id="commentAuthor" placeholder="你的昵称" required>
+            <textarea id="commentContent" placeholder="写下你的评论..." required></textarea>
+            <button type="submit" class="btn btn-primary" style="background: var(--accent); color: var(--bg-primary); padding: 0.8rem 1.5rem; border: none; border-radius: 4px; cursor: pointer;">发表评论</button>
+        </form>
+
+        <!-- 评论列表 -->
+        <div class="comment-list" id="commentList"></div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <p>&copy; 2026 光影记 Photography. All rights reserved.</p>
+        <div class="social-links">
+            <a href="#" target="_blank">Instagram</a>
+            <a href="#" target="_blank">500px</a>
+            <a href="mailto:hello@example.com">Email</a>
+        </div>
+    </footer>
+
+    <script>
+        const SUPABASE_URL = 'https://sybgiwnksanuddwjeqkv.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN5Ymdpd25rc2FudWRkd2plcWt2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5NjczNjIsImV4cCI6MjA4OTU0MzM2Mn0.XOKk8sQxXknUlRKJtzp0wDPNjDDpkiz1YpoMdC6F6yE';
+
+        const categoryNames = {
+            tutorial: '教程',
+            thoughts: '随笔',
+            gear: '器材',
+            general: '随笔'
+        };
+
+        // 获取文章 ID
+        const urlParams = new URLSearchParams(window.location.search);
+        const articleId = urlParams.get('id');
+
+        async function init() {
+            if (!articleId) {
+                window.location.href = 'articles.html';
+                return;
+            }
+            
+            await loadArticle();
+            await loadComments();
+        }
+
+        async function loadArticle() {
+            const page = document.getElementById('articlePage');
+            
+            try {
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/articles?id=eq.${articleId}`, {
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`
+                    }
+                });
+                
+                if (!res.ok) throw new Error('Failed to fetch');
+                
+                const articles = await res.json();
+                if (articles.length === 0) {
+                    window.location.href = 'articles.html';
+                    return;
+                }
+                
+                const article = articles[0];
+                
+                // 增加浏览次数
+                const newViews = (article.views || 0) + 1;
+                await fetch(`${SUPABASE_URL}/rest/v1/articles?id=eq.${articleId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ views: newViews })
+                });
+                
+                // 渲染文章
+                document.title = `${article.title} | 光影记`;
+                
+                // 转换 Markdown 简单处理
+                let content = article.content
+                    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+                    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+                    .replace(/\n\n/g, '</p><p>')
+                    .replace(/\n/g, '<br>');
+                
+                page.innerHTML = `
+                    <a href="articles.html" class="back-link">← 返回文章列表</a>
+                    <div class="cover">
+                        <img src="${article.cover_image || 'https://images.unsplash.com/photo-1452587925148-ce544e77e70d?w=800'}" alt="${article.title}">
+                    </div>
+                    <span class="category">${categoryNames[article.category] || '随笔'}</span>
+                    <h1>${article.title}</h1>
+                    <div class="meta">
+                        <span>👁 ${newViews} 次阅读</span>
+                        <span>📅 ${formatDate(article.created_at)}</span>
+                    </div>
+                    <div class="content">
+                        <p>${content}</p>
+                    </div>
+                `;
+                
+                document.getElementById('commentsSection').style.display = 'block';
+            } catch (err) {
+                page.innerHTML = `<p style="text-align: center; color: var(--text-secondary);">加载失败: ${err.message}</p>`;
+            }
+        }
+
+        async function loadComments() {
+            const list = document.getElementById('commentList');
+            const countEl = document.getElementById('commentCount');
+            
+            try {
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/comments?article_id=eq.${articleId}&order=created_at.desc`, {
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`
+                    }
+                });
+                
+                if (!res.ok) throw new Error('Failed to fetch');
+                
+                const comments = await res.json();
+                countEl.textContent = `${comments.length} 条评论`;
+                
+                if (comments.length === 0) {
+                    list.innerHTML = '<p style="color: var(--text-muted); text-align: center;">暂无评论，快来抢沙发吧！</p>';
+                    return;
+                }
+                
+                list.innerHTML = comments.map(c => `
+                    <div class="comment">
+                        <div class="comment-header">
+                            <span class="comment-author">${c.author}</span>
+                            <span class="comment-date">${formatDate(c.created_at)}</span>
+                        </div>
+                        <p class="comment-content">${c.content}</p>
+                    </div>
+                `).join('');
+            } catch (err) {
+                list.innerHTML = `<p style="color: var(--text-muted);">评论加载失败</p>`;
+            }
+        }
+
+        // 提交评论
+        document.getElementById('commentForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const author = document.getElementById('commentAuthor').value;
+            const content = document.getElementById('commentContent').value;
+            
+            try {
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/comments`, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=minimal'
+                    },
+                    body: JSON.stringify({
+                        article_id: parseInt(articleId),
+                        author: author,
+                        content: content
+                    })
+                });
+                
+                if (res.ok) {
+                    document.getElementById('commentContent').value = '';
+                    loadComments();
+                } else {
+                    alert('评论失败，请重试');
+                }
+            } catch (err) {
+                alert('评论失败: ' + err.message);
+            }
+        });
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')} ${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`;
+        }
+
+        // 移动端菜单
+        document.querySelector('.mobile-menu-btn').addEventListener('click', () => {
+            document.querySelector('.mobile-menu').classList.toggle('active');
+        });
+
+        init();
+    </script>
+</body>
+</html>

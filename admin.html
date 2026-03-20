@@ -29,6 +29,39 @@
             min-height: 100vh;
         }
 
+        /* 标签页导航 */
+        .tab-nav {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1rem;
+        }
+
+        .tab-btn {
+            padding: 0.5rem 1rem;
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .tab-btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: var(--bg-primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
         /* 登录页 */
         .login-container {
             min-height: 100vh;
@@ -85,9 +118,21 @@
             font-size: 1rem;
         }
 
-        .form-group input:focus {
+        .form-group input:focus,
+        .form-group textarea:focus {
             outline: none;
             border-color: var(--accent);
+        }
+
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
         }
 
         .btn {
@@ -103,7 +148,6 @@
         .btn-primary {
             background: var(--accent);
             color: var(--bg-primary);
-            width: 100%;
         }
 
         .btn-primary:hover {
@@ -164,20 +208,23 @@
             color: var(--text-primary);
         }
 
-        /* 作品表格 */
-        .photos-table {
+        /* 表格 */
+        .photos-table, .articles-table {
             width: 100%;
             border-collapse: collapse;
         }
 
         .photos-table th,
-        .photos-table td {
+        .photos-table td,
+        .articles-table th,
+        .articles-table td {
             padding: 1rem;
             text-align: left;
             border-bottom: 1px solid var(--border);
         }
 
-        .photos-table th {
+        .photos-table th,
+        .articles-table th {
             color: var(--text-secondary);
             font-weight: 400;
             font-size: 0.85rem;
@@ -190,7 +237,8 @@
             border-radius: 4px;
         }
 
-        .photos-table .actions {
+        .photos-table .actions,
+        .articles-table .actions {
             display: flex;
             gap: 0.5rem;
         }
@@ -225,7 +273,7 @@
             padding: 2rem;
             border-radius: 8px;
             width: 100%;
-            max-width: 500px;
+            max-width: 600px;
             max-height: 90vh;
             overflow-y: auto;
         }
@@ -273,12 +321,6 @@
             margin-top: 0.5rem;
         }
 
-        .success {
-            color: #2ecc71;
-            font-size: 0.85rem;
-            margin-top: 0.5rem;
-        }
-
         .loading {
             text-align: center;
             padding: 2rem;
@@ -297,7 +339,7 @@
                     <label>管理员密码</label>
                     <input type="password" id="password" required placeholder="请输入密码">
                 </div>
-                <button type="submit" class="btn btn-primary">登录</button>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">登录</button>
                 <p class="error" id="loginError"></p>
             </form>
         </div>
@@ -306,65 +348,155 @@
     <!-- 管理后台 -->
     <div class="admin-container" id="adminPage">
         <div class="admin-header">
-            <h1>作品管理</h1>
+            <h1>内容管理</h1>
             <div class="actions">
-                <button class="btn btn-primary" onclick="openModal()">+ 添加作品</button>
                 <button class="btn btn-logout" onclick="logout()">退出</button>
             </div>
         </div>
 
-        <table class="photos-table">
-            <thead>
-                <tr>
-                    <th>封面</th>
-                    <th>标题</th>
-                    <th>描述</th>
-                    <th>分类</th>
-                    <th>操作</th>
-                </tr>
-            </thead>
-            <tbody id="photosTable">
-                <tr><td colspan="5" class="loading">加载中...</td></tr>
-            </tbody>
-        </table>
+        <!-- 标签页 -->
+        <div class="tab-nav">
+            <button class="tab-btn active" onclick="switchTab('photos')">作品管理</button>
+            <button class="tab-btn" onclick="switchTab('articles')">文章管理</button>
+        </div>
+
+        <!-- 作品管理 -->
+        <div class="tab-content active" id="tab-photos">
+            <div class="admin-header">
+                <h2>作品列表</h2>
+                <button class="btn btn-primary" onclick="openPhotoModal()">+ 添加作品</button>
+            </div>
+            <table class="photos-table">
+                <thead>
+                    <tr>
+                        <th>封面</th>
+                        <th>标题</th>
+                        <th>分类</th>
+                        <th>浏览</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="photosTable">
+                    <tr><td colspan="5" class="loading">加载中...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 文章管理 -->
+        <div class="tab-content" id="tab-articles">
+            <div class="admin-header">
+                <h2>文章列表</h2>
+                <button class="btn btn-primary" onclick="openArticleModal()">+ 添加文章</button>
+            </div>
+            <table class="articles-table">
+                <thead>
+                    <tr>
+                        <th>标题</th>
+                        <th>分类</th>
+                        <th>浏览</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="articlesTable">
+                    <tr><td colspan="4" class="loading">加载中...</td></tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
-    <!-- 添加/编辑模态框 -->
+    <!-- 作品模态框 -->
     <div class="modal" id="photoModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 id="modalTitle">添加作品</h2>
-                <button class="modal-close" onclick="closeModal()">&times;</button>
+                <h2 id="photoModalTitle">添加作品</h2>
+                <button class="modal-close" onclick="closePhotoModal()">&times;</button>
             </div>
             <form id="photoForm">
                 <input type="hidden" id="photoId">
                 <div class="form-group">
-                    <label>标题</label>
+                    <label>标题 *</label>
                     <input type="text" id="photoTitle" required>
                 </div>
                 <div class="form-group">
                     <label>描述</label>
                     <input type="text" id="photoDesc">
                 </div>
-                <div class="form-group">
-                    <label>分类</label>
-                    <select id="photoCategory">
-                        <option value="landscape">风景</option>
-                        <option value="portrait">人像</option>
-                        <option value="street">街拍</option>
-                        <option value="detail">细节</option>
-                    </select>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>分类</label>
+                        <select id="photoCategory">
+                            <option value="landscape">风景</option>
+                            <option value="portrait">人像</option>
+                            <option value="street">街拍</option>
+                            <option value="detail">细节</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>拍摄地点</label>
+                        <input type="text" id="photoLocation" placeholder="如：日本·北海道">
+                    </div>
                 </div>
                 <div class="form-group">
-                    <label>图片 URL</label>
+                    <label>图片 URL *</label>
                     <input type="url" id="photoSrc" required placeholder="https://...">
                 </div>
                 <div class="form-group">
-                    <label>缩略图 URL（留空则使用原图）</label>
-                    <input type="url" id="photoThumb" placeholder="https://...">
+                    <label>缩略图 URL</label>
+                    <input type="url" id="photoThumb" placeholder="留空使用原图">
+                </div>
+                <div class="form-group">
+                    <label>摄影参数 (JSON)</label>
+                    <input type="text" id="photoExif" placeholder='{"camera": "Sony A7R IV", "lens": "24-70mm", "aperture": "f/2.8"}'>
+                </div>
+                <div class="form-group">
+                    <label>摄影心得</label>
+                    <textarea id="photoThoughts" placeholder="分享这张照片的拍摄故事和心得..."></textarea>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-cancel" onclick="closeModal()">取消</button>
+                    <button type="button" class="btn btn-cancel" onclick="closePhotoModal()">取消</button>
+                    <button type="submit" class="btn btn-primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 文章模态框 -->
+    <div class="modal" id="articleModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="articleModalTitle">添加文章</h2>
+                <button class="modal-close" onclick="closeArticleModal()">&times;</button>
+            </div>
+            <form id="articleForm">
+                <input type="hidden" id="articleId">
+                <div class="form-group">
+                    <label>标题 *</label>
+                    <input type="text" id="articleTitle" required>
+                </div>
+                <div class="form-group">
+                    <label>摘要</label>
+                    <input type="text" id="articleExcerpt" placeholder="文章简介...">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>分类</label>
+                        <select id="articleCategory">
+                            <option value="tutorial">教程</option>
+                            <option value="thoughts">随笔</option>
+                            <option value="gear">器材</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>封面图 URL</label>
+                        <input type="url" id="articleCover" placeholder="https://...">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>内容 (支持 Markdown) *</label>
+                    <textarea id="articleContent" required style="min-height: 200px;" placeholder="使用 # 标题，## 二级标题..."></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-cancel" onclick="closeArticleModal()">取消</button>
                     <button type="submit" class="btn btn-primary">保存</button>
                 </div>
             </form>
@@ -372,191 +504,253 @@
     </div>
 
     <script>
-        // 配置
         const SUPABASE_URL = 'https://sybgiwnksanuddwjeqkv.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN5Ymdpd25rc2FudWRkd2plcWt2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5NjczNjIsImV4cCI6MjA4OTU0MzM2Mn0.XOKk8sQxXknUlRKJtzp0wDPNjDDpkiz1YpoMdC6F6yE';
         
-        // 简单密码验证（生产环境建议用更安全的方式）
-        const ADMIN_PASSWORD = 'admin123';
-        
-        let isLoggedIn = false;
+        const ADMIN_PASSWORD = 'admin_password';
 
-        // 检查登录状态
         function checkAuth() {
-            isLoggedIn = localStorage.getItem('admin_logged_in') === 'true';
-            if (isLoggedIn) {
+            const loggedIn = localStorage.getItem('admin_logged_in') === 'true';
+            if (loggedIn) {
                 showAdmin();
                 loadPhotos();
+                loadArticles();
             }
         }
 
-        // 登录
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const password = document.getElementById('password').value;
             
             if (password === ADMIN_PASSWORD) {
                 localStorage.setItem('admin_logged_in', 'true');
-                isLoggedIn = true;
                 showAdmin();
                 loadPhotos();
+                loadArticles();
             } else {
                 document.getElementById('loginError').textContent = '密码错误';
             }
         });
 
-        // 退出
         function logout() {
             localStorage.removeItem('admin_logged_in');
-            isLoggedIn = false;
             document.getElementById('loginPage').style.display = 'flex';
             document.getElementById('adminPage').style.display = 'none';
         }
 
-        // 显示后台
         function showAdmin() {
             document.getElementById('loginPage').style.display = 'none';
             document.getElementById('adminPage').style.display = 'block';
         }
 
-        // 加载作品列表
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelector(`.tab-btn[onclick="switchTab('${tab}')"]`).classList.add('active');
+            document.getElementById(`tab-${tab}`).classList.add('active');
+        }
+
+        // ===== 作品管理 =====
         async function loadPhotos() {
             const tbody = document.getElementById('photosTable');
             tbody.innerHTML = '<tr><td colspan="5" class="loading">加载中...</td></tr>';
             
             try {
                 const res = await fetch(`${SUPABASE_URL}/rest/v1/photos?order=created_at.desc`, {
-                    headers: {
-                        'apikey': SUPABASE_KEY,
-                        'Authorization': `Bearer ${SUPABASE_KEY}`
-                    }
+                    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
                 });
-                
-                if (!res.ok) throw new Error('Failed to fetch');
                 
                 const photos = await res.json();
                 renderPhotos(photos);
             } catch (err) {
-                tbody.innerHTML = `<tr><td colspan="5" class="error">加载失败: ${err.message}</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" class="error">加载失败</td></tr>`;
             }
         }
 
-        // 渲染作品列表
         function renderPhotos(photos) {
             const tbody = document.getElementById('photosTable');
+            const names = { landscape: '风景', portrait: '人像', street: '街拍', detail: '细节' };
             
-            if (photos.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="loading">暂无作品，点击"添加作品"开始</td></tr>';
-                return;
-            }
-            
-            tbody.innerHTML = photos.map(photo => `
+            tbody.innerHTML = photos.map(p => `
                 <tr>
-                    <td><img src="${photo.thumb || photo.src}" alt="${photo.title}"></td>
-                    <td>${photo.title}</td>
-                    <td>${photo.description || '-'}</td>
-                    <td><span class="category-tag">${getCategoryName(photo.category)}</span></td>
+                    <td><img src="${p.thumb || p.src}" alt="${p.title}"></td>
+                    <td>${p.title}</td>
+                    <td><span class="category-tag">${names[p.category] || p.category}</span></td>
+                    <td>${p.views || 0}</td>
                     <td class="actions">
-                        <button class="btn btn-edit" onclick="editPhoto(${photo.id}, '${photo.title}', '${photo.description || ''}', '${photo.category}', '${photo.src}', '${photo.thumb || ''}')">编辑</button>
-                        <button class="btn btn-danger" onclick="deletePhoto(${photo.id})">删除</button>
+                        <button class="btn btn-edit" onclick='editPhoto(${JSON.stringify(p)})'>编辑</button>
+                        <button class="btn btn-danger" onclick="deletePhoto(${p.id})">删除</button>
                     </td>
                 </tr>
-            `).join('');
+            `).join('') || '<tr><td colspan="5" class="loading">暂无作品</td></tr>';
         }
 
-        function getCategoryName(cat) {
-            const names = { landscape: '风景', portrait: '人像', street: '街拍', detail: '细节' };
-            return names[cat] || cat;
-        }
-
-        // 打开模态框
-        function openModal(id = null) {
+        function openPhotoModal(id = null) {
             document.getElementById('photoModal').classList.add('active');
-            document.getElementById('modalTitle').textContent = id ? '编辑作品' : '添加作品';
+            document.getElementById('photoModalTitle').textContent = id ? '编辑作品' : '添加作品';
             document.getElementById('photoId').value = id || '';
         }
 
-        // 关闭模态框
-        function closeModal() {
+        function closePhotoModal() {
             document.getElementById('photoModal').classList.remove('active');
             document.getElementById('photoForm').reset();
         }
 
-        // 编辑作品
-        function editPhoto(id, title, desc, category, src, thumb) {
-            openModal(id);
-            document.getElementById('photoId').value = id;
-            document.getElementById('photoTitle').value = title;
-            document.getElementById('photoDesc').value = desc;
-            document.getElementById('photoCategory').value = category;
-            document.getElementById('photoSrc').value = src;
-            document.getElementById('photoThumb').value = thumb;
+        function editPhoto(photo) {
+            openPhotoModal(photo.id);
+            document.getElementById('photoId').value = photo.id;
+            document.getElementById('photoTitle').value = photo.title;
+            document.getElementById('photoDesc').value = photo.description || '';
+            document.getElementById('photoCategory').value = photo.category;
+            document.getElementById('photoLocation').value = photo.location || '';
+            document.getElementById('photoSrc').value = photo.src;
+            document.getElementById('photoThumb').value = photo.thumb || '';
+            document.getElementById('photoExif').value = photo.exif ? (typeof photo.exif === 'string' ? photo.exif : JSON.stringify(photo.exif)) : '';
+            document.getElementById('photoThoughts').value = photo.thoughts || '';
         }
 
-        // 删除作品
         async function deletePhoto(id) {
-            if (!confirm('确定要删除这个作品吗？')) return;
+            if (!confirm('确定删除？')) return;
             
-            try {
-                const res = await fetch(`${SUPABASE_URL}/rest/v1/photos?id=eq.${id}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'apikey': SUPABASE_KEY,
-                        'Authorization': `Bearer ${SUPABASE_KEY}`
-                    }
-                });
-                
-                if (res.ok) {
-                    loadPhotos();
-                } else {
-                    alert('删除失败');
-                }
-            } catch (err) {
-                alert('删除失败: ' + err.message);
-            }
+            await fetch(`${SUPABASE_URL}/rest/v1/photos?id=eq.${id}`, {
+                method: 'DELETE',
+                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+            });
+            loadPhotos();
         }
 
-        // 提交表单
         document.getElementById('photoForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            const id = document.getElementById('photoId').value;
+            let exif = null;
+            const exifStr = document.getElementById('photoExif').value;
+            if (exifStr) {
+                try { exif = JSON.parse(exifStr); } catch {}
+            }
+            
             const data = {
                 title: document.getElementById('photoTitle').value,
                 description: document.getElementById('photoDesc').value,
                 category: document.getElementById('photoCategory').value,
+                location: document.getElementById('photoLocation').value,
                 src: document.getElementById('photoSrc').value,
-                thumb: document.getElementById('photoThumb').value || document.getElementById('photoSrc').value
+                thumb: document.getElementById('photoThumb').value || document.getElementById('photoSrc').value,
+                exif: exif,
+                thoughts: document.getElementById('photoThoughts').value
             };
             
-            try {
-                const url = id 
-                    ? `${SUPABASE_URL}/rest/v1/photos?id=eq.${id}`
-                    : `${SUPABASE_URL}/rest/v1/photos`;
-                
-                const res = await fetch(url, {
-                    method: id ? 'PATCH' : 'POST',
-                    headers: {
-                        'apikey': SUPABASE_KEY,
-                        'Authorization': `Bearer ${SUPABASE_KEY}`,
-                        'Content-Type': 'application/json',
-                        'Prefer': 'return=minimal'
-                    },
-                    body: JSON.stringify(data)
-                });
-                
-                if (res.ok) {
-                    closeModal();
-                    loadPhotos();
-                } else {
-                    alert('保存失败');
-                }
-            } catch (err) {
-                alert('保存失败: ' + err.message);
-            }
+            const id = document.getElementById('photoId').value;
+            const url = id ? `${SUPABASE_URL}/rest/v1/photos?id=eq.${id}` : `${SUPABASE_URL}/rest/v1/photos`;
+            
+            await fetch(url, {
+                method: id ? 'PATCH' : 'POST',
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`,
+                    'Content-Type': 'application/json',
+                    'Prefer': 'return=minimal'
+                },
+                body: JSON.stringify(data)
+            });
+            
+            closePhotoModal();
+            loadPhotos();
         });
 
-        // 初始化
+        // ===== 文章管理 =====
+        async function loadArticles() {
+            const tbody = document.getElementById('articlesTable');
+            tbody.innerHTML = '<tr><td colspan="4" class="loading">加载中...</td></tr>';
+            
+            try {
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/articles?order=created_at.desc`, {
+                    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+                });
+                
+                const articles = await res.json();
+                renderArticles(articles);
+            } catch (err) {
+                tbody.innerHTML = `<tr><td colspan="4" class="error">加载失败</td></tr>`;
+            }
+        }
+
+        function renderArticles(articles) {
+            const tbody = document.getElementById('articlesTable');
+            const names = { tutorial: '教程', thoughts: '随笔', gear: '器材' };
+            
+            tbody.innerHTML = articles.map(a => `
+                <tr>
+                    <td>${a.title}</td>
+                    <td><span class="category-tag">${names[a.category] || a.category}</span></td>
+                    <td>${a.views || 0}</td>
+                    <td class="actions">
+                        <button class="btn btn-edit" onclick='editArticle(${JSON.stringify(a)})'>编辑</button>
+                        <button class="btn btn-danger" onclick="deleteArticle(${a.id})">删除</button>
+                    </td>
+                </tr>
+            `).join('') || '<tr><td colspan="4" class="loading">暂无文章</td></tr>';
+        }
+
+        function openArticleModal(id = null) {
+            document.getElementById('articleModal').classList.add('active');
+            document.getElementById('articleModalTitle').textContent = id ? '编辑文章' : '添加文章';
+            document.getElementById('articleId').value = id || '';
+        }
+
+        function closeArticleModal() {
+            document.getElementById('articleModal').classList.remove('active');
+            document.getElementById('articleForm').reset();
+        }
+
+        function editArticle(article) {
+            openArticleModal(article.id);
+            document.getElementById('articleId').value = article.id;
+            document.getElementById('articleTitle').value = article.title;
+            document.getElementById('articleExcerpt').value = article.excerpt || '';
+            document.getElementById('articleCategory').value = article.category;
+            document.getElementById('articleCover').value = article.cover_image || '';
+            document.getElementById('articleContent').value = article.content;
+        }
+
+        async function deleteArticle(id) {
+            if (!confirm('确定删除？')) return;
+            
+            await fetch(`${SUPABASE_URL}/rest/v1/articles?id=eq.${id}`, {
+                method: 'DELETE',
+                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+            });
+            loadArticles();
+        }
+
+        document.getElementById('articleForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const data = {
+                title: document.getElementById('articleTitle').value,
+                excerpt: document.getElementById('articleExcerpt').value,
+                category: document.getElementById('articleCategory').value,
+                cover_image: document.getElementById('articleCover').value,
+                content: document.getElementById('articleContent').value
+            };
+            
+            const id = document.getElementById('articleId').value;
+            const url = id ? `${SUPABASE_URL}/rest/v1/articles?id=eq.${id}` : `${SUPABASE_URL}/rest/v1/articles`;
+            
+            await fetch(url, {
+                method: id ? 'PATCH' : 'POST',
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`,
+                    'Content-Type': 'application/json',
+                    'Prefer': 'return=minimal'
+                },
+                body: JSON.stringify(data)
+            });
+            
+            closeArticleModal();
+            loadArticles();
+        });
+
         checkAuth();
     </script>
 </body>

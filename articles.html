@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文章 | 光影记</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600&family=Cormorant+Garamond:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- 导航 -->
+    <nav class="nav">
+        <div class="nav-inner">
+            <a href="index.html" class="logo">光影记</a>
+            <ul class="nav-links">
+                <li><a href="index.html">作品</a></li>
+                <li><a href="articles.html" class="active">文章</a></li>
+                <li><a href="about.html">关于</a></li>
+                <li><a href="contact.html">联系</a></li>
+            </ul>
+            <button class="mobile-menu-btn" aria-label="菜单">
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- 移动端菜单 -->
+    <div class="mobile-menu">
+        <a href="index.html">作品</a>
+        <a href="articles.html">文章</a>
+        <a href="about.html">关于</a>
+        <a href="contact.html">联系</a>
+    </div>
+
+    <!-- 文章列表 -->
+    <section class="articles-section">
+        <div class="articles-header">
+            <h1>ARTICLES</h1>
+            <p style="color: var(--text-secondary); margin-top: 0.5rem;">摄影心得 & 技术分享</p>
+        </div>
+        <div class="articles-grid" id="articlesGrid">
+            <p class="loading" style="grid-column: 1/-1; text-align: center; color: var(--text-secondary);">加载中...</p>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <p>&copy; 2026 光影记 Photography. All rights reserved.</p>
+        <div class="social-links">
+            <a href="#" target="_blank">Instagram</a>
+            <a href="#" target="_blank">500px</a>
+            <a href="mailto:hello@example.com">Email</a>
+        </div>
+    </footer>
+
+    <script>
+        const SUPABASE_URL = 'https://sybgiwnksanuddwjeqkv.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN5Ymdpd25rc2FudWRkd2plcWt2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5NjczNjIsImV4cCI6MjA4OTU0MzM2Mn0.XOKk8sQxXknUlRKJtzp0wDPNjDDpkiz1YpoMdC6F6yE';
+
+        const categoryNames = {
+            tutorial: '教程',
+            thoughts: '随笔',
+            gear: '器材',
+            general: '随笔'
+        };
+
+        async function loadArticles() {
+            const grid = document.getElementById('articlesGrid');
+            
+            try {
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/articles?order=created_at.desc`, {
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`
+                    }
+                });
+                
+                if (!res.ok) throw new Error('Failed to fetch');
+                
+                const articles = await res.json();
+                renderArticles(articles);
+            } catch (err) {
+                grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: var(--text-secondary);">加载失败: ${err.message}</p>`;
+            }
+        }
+
+        function renderArticles(articles) {
+            const grid = document.getElementById('articlesGrid');
+            
+            if (articles.length === 0) {
+                grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-secondary);">暂无文章</p>';
+                return;
+            }
+            
+            grid.innerHTML = articles.map(article => `
+                <article class="article-card" onclick="window.location.href='article.html?id=${article.id}'">
+                    <div class="cover">
+                        <img src="${article.cover_image || 'https://images.unsplash.com/photo-1452587925148-ce544e77e70d?w=800'}" alt="${article.title}" loading="lazy">
+                    </div>
+                    <div class="content">
+                        <span class="category">${categoryNames[article.category] || '随笔'}</span>
+                        <h2>${article.title}</h2>
+                        <p class="excerpt">${article.excerpt || article.content.substring(0, 100) + '...'}</p>
+                        <div class="meta">
+                            <span>👁 ${article.views || 0}</span>
+                            <span>📅 ${formatDate(article.created_at)}</span>
+                        </div>
+                    </div>
+                </article>
+            `).join('');
+        }
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+        }
+
+        // 移动端菜单
+        document.querySelector('.mobile-menu-btn').addEventListener('click', () => {
+            document.querySelector('.mobile-menu').classList.toggle('active');
+        });
+
+        loadArticles();
+    </script>
+</body>
+</html>
