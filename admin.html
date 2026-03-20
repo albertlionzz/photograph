@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理后台 | 光影记</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600&family=Cormorant+Garamond:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #141414;
+            --bg-card: #1a1a1a;
+            --text-primary: #f5f5f5;
+            --text-secondary: #888;
+            --accent: #c9a962;
+            --accent-hover: #dfc07a;
+            --border: #222;
+            --danger: #e74c3c;
+            --font-cn: 'Noto Serif SC', serif;
+            --font-en: 'Cormorant Garamond', serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: var(--font-cn);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        /* 登录页 */
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .login-box {
+            background: var(--bg-card);
+            padding: 3rem;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-box h1 {
+            font-family: var(--font-en);
+            font-size: 1.8rem;
+            font-weight: 300;
+            margin-bottom: 0.5rem;
+            text-align: center;
+        }
+
+        .login-box p {
+            color: var(--text-secondary);
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.8rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 1rem;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: var(--bg-primary);
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+        }
+
+        .btn-edit {
+            background: var(--accent);
+            color: var(--bg-primary);
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+        }
+
+        /* 管理后台 */
+        .admin-container {
+            display: none;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .admin-header h1 {
+            font-family: var(--font-en);
+            font-size: 1.5rem;
+            font-weight: 300;
+        }
+
+        .admin-header .actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .btn-logout {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+
+        .btn-logout:hover {
+            border-color: var(--text-primary);
+            color: var(--text-primary);
+        }
+
+        /* 作品表格 */
+        .photos-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .photos-table th,
+        .photos-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .photos-table th {
+            color: var(--text-secondary);
+            font-weight: 400;
+            font-size: 0.85rem;
+        }
+
+        .photos-table img {
+            width: 80px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+
+        .photos-table .actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .category-tag {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            background: var(--bg-secondary);
+            border-radius: 3px;
+            font-size: 0.75rem;
+            color: var(--accent);
+        }
+
+        /* 模态框 */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            padding: 2rem;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h2 {
+            font-family: var(--font-en);
+            font-size: 1.3rem;
+            font-weight: 400;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .modal-footer .btn {
+            flex: 1;
+        }
+
+        .btn-cancel {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .error {
+            color: var(--danger);
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+        }
+
+        .success {
+            color: #2ecc71;
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <!-- 登录页 -->
+    <div class="login-container" id="loginPage">
+        <div class="login-box">
+            <h1>光影记</h1>
+            <p>管理后台</p>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>管理员密码</label>
+                    <input type="password" id="password" required placeholder="请输入密码">
+                </div>
+                <button type="submit" class="btn btn-primary">登录</button>
+                <p class="error" id="loginError"></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- 管理后台 -->
+    <div class="admin-container" id="adminPage">
+        <div class="admin-header">
+            <h1>作品管理</h1>
+            <div class="actions">
+                <button class="btn btn-primary" onclick="openModal()">+ 添加作品</button>
+                <button class="btn btn-logout" onclick="logout()">退出</button>
+            </div>
+        </div>
+
+        <table class="photos-table">
+            <thead>
+                <tr>
+                    <th>封面</th>
+                    <th>标题</th>
+                    <th>描述</th>
+                    <th>分类</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody id="photosTable">
+                <tr><td colspan="5" class="loading">加载中...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 添加/编辑模态框 -->
+    <div class="modal" id="photoModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">添加作品</h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <form id="photoForm">
+                <input type="hidden" id="photoId">
+                <div class="form-group">
+                    <label>标题</label>
+                    <input type="text" id="photoTitle" required>
+                </div>
+                <div class="form-group">
+                    <label>描述</label>
+                    <input type="text" id="photoDesc">
+                </div>
+                <div class="form-group">
+                    <label>分类</label>
+                    <select id="photoCategory">
+                        <option value="landscape">风景</option>
+                        <option value="portrait">人像</option>
+                        <option value="street">街拍</option>
+                        <option value="detail">细节</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>图片 URL</label>
+                    <input type="url" id="photoSrc" required placeholder="https://...">
+                </div>
+                <div class="form-group">
+                    <label>缩略图 URL（留空则使用原图）</label>
+                    <input type="url" id="photoThumb" placeholder="https://...">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-cancel" onclick="closeModal()">取消</button>
+                    <button type="submit" class="btn btn-primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // 配置
+        const SUPABASE_URL = 'https://sybgiwnksanuddwjeqkv.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN5Ymdpd25rc2FudWRkd2plcWt2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5NjczNjIsImV4cCI6MjA4OTU0MzM2Mn0.XOKk8sQxXknUlRKJtzp0wDPNjDDpkiz1YpoMdC6F6yE';
+        
+        // 简单密码验证（生产环境建议用更安全的方式）
+        const ADMIN_PASSWORD = 'admin123';
+        
+        let isLoggedIn = false;
+
+        // 检查登录状态
+        function checkAuth() {
+            isLoggedIn = localStorage.getItem('admin_logged_in') === 'true';
+            if (isLoggedIn) {
+                showAdmin();
+                loadPhotos();
+            }
+        }
+
+        // 登录
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const password = document.getElementById('password').value;
+            
+            if (password === ADMIN_PASSWORD) {
+                localStorage.setItem('admin_logged_in', 'true');
+                isLoggedIn = true;
+                showAdmin();
+                loadPhotos();
+            } else {
+                document.getElementById('loginError').textContent = '密码错误';
+            }
+        });
+
+        // 退出
+        function logout() {
+            localStorage.removeItem('admin_logged_in');
+            isLoggedIn = false;
+            document.getElementById('loginPage').style.display = 'flex';
+            document.getElementById('adminPage').style.display = 'none';
+        }
+
+        // 显示后台
+        function showAdmin() {
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('adminPage').style.display = 'block';
+        }
+
+        // 加载作品列表
+        async function loadPhotos() {
+            const tbody = document.getElementById('photosTable');
+            tbody.innerHTML = '<tr><td colspan="5" class="loading">加载中...</td></tr>';
+            
+            try {
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/photos?order=created_at.desc`, {
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`
+                    }
+                });
+                
+                if (!res.ok) throw new Error('Failed to fetch');
+                
+                const photos = await res.json();
+                renderPhotos(photos);
+            } catch (err) {
+                tbody.innerHTML = `<tr><td colspan="5" class="error">加载失败: ${err.message}</td></tr>`;
+            }
+        }
+
+        // 渲染作品列表
+        function renderPhotos(photos) {
+            const tbody = document.getElementById('photosTable');
+            
+            if (photos.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="loading">暂无作品，点击"添加作品"开始</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = photos.map(photo => `
+                <tr>
+                    <td><img src="${photo.thumb || photo.src}" alt="${photo.title}"></td>
+                    <td>${photo.title}</td>
+                    <td>${photo.description || '-'}</td>
+                    <td><span class="category-tag">${getCategoryName(photo.category)}</span></td>
+                    <td class="actions">
+                        <button class="btn btn-edit" onclick="editPhoto(${photo.id}, '${photo.title}', '${photo.description || ''}', '${photo.category}', '${photo.src}', '${photo.thumb || ''}')">编辑</button>
+                        <button class="btn btn-danger" onclick="deletePhoto(${photo.id})">删除</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function getCategoryName(cat) {
+            const names = { landscape: '风景', portrait: '人像', street: '街拍', detail: '细节' };
+            return names[cat] || cat;
+        }
+
+        // 打开模态框
+        function openModal(id = null) {
+            document.getElementById('photoModal').classList.add('active');
+            document.getElementById('modalTitle').textContent = id ? '编辑作品' : '添加作品';
+            document.getElementById('photoId').value = id || '';
+        }
+
+        // 关闭模态框
+        function closeModal() {
+            document.getElementById('photoModal').classList.remove('active');
+            document.getElementById('photoForm').reset();
+        }
+
+        // 编辑作品
+        function editPhoto(id, title, desc, category, src, thumb) {
+            openModal(id);
+            document.getElementById('photoId').value = id;
+            document.getElementById('photoTitle').value = title;
+            document.getElementById('photoDesc').value = desc;
+            document.getElementById('photoCategory').value = category;
+            document.getElementById('photoSrc').value = src;
+            document.getElementById('photoThumb').value = thumb;
+        }
+
+        // 删除作品
+        async function deletePhoto(id) {
+            if (!confirm('确定要删除这个作品吗？')) return;
+            
+            try {
+                const res = await fetch(`${SUPABASE_URL}/rest/v1/photos?id=eq.${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`
+                    }
+                });
+                
+                if (res.ok) {
+                    loadPhotos();
+                } else {
+                    alert('删除失败');
+                }
+            } catch (err) {
+                alert('删除失败: ' + err.message);
+            }
+        }
+
+        // 提交表单
+        document.getElementById('photoForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const id = document.getElementById('photoId').value;
+            const data = {
+                title: document.getElementById('photoTitle').value,
+                description: document.getElementById('photoDesc').value,
+                category: document.getElementById('photoCategory').value,
+                src: document.getElementById('photoSrc').value,
+                thumb: document.getElementById('photoThumb').value || document.getElementById('photoSrc').value
+            };
+            
+            try {
+                const url = id 
+                    ? `${SUPABASE_URL}/rest/v1/photos?id=eq.${id}`
+                    : `${SUPABASE_URL}/rest/v1/photos`;
+                
+                const res = await fetch(url, {
+                    method: id ? 'PATCH' : 'POST',
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=minimal'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                if (res.ok) {
+                    closeModal();
+                    loadPhotos();
+                } else {
+                    alert('保存失败');
+                }
+            } catch (err) {
+                alert('保存失败: ' + err.message);
+            }
+        });
+
+        // 初始化
+        checkAuth();
+    </script>
+</body>
+</html>
