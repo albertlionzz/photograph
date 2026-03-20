@@ -2,26 +2,6 @@
 const SUPABASE_URL = 'https://sybgiwnksanuddwjeqkv.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN5Ymdpd25rc2FudWRkd2plcWt2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5NjczNjIsImV4cCI6MjA4OTU0MzM2Mn0.XOKk8sQxXknUlRKJtzp0wDPNjDDpkiz1YpoMdC6F6yE';
 
-// 照片数据（本地备用）
-const localPhotos = [
-    {
-        id: 1,
-        title: "暮色北海道",
-        description: "冬季北海道的日落时分",
-        category: "landscape",
-        src: "https://images.unsplash.com/photo-1491002052546-bf38f186af56?w=800",
-        thumb: "https://images.unsplash.com/photo-1491002052546-bf38f186af56?w=400"
-    },
-    {
-        id: 2,
-        title: "城市轮廓",
-        description: "雨后的城市天际线",
-        category: "landscape",
-        src: "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=800",
-        thumb: "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=400"
-    }
-];
-
 // DOM 元素
 const galleryGrid = document.querySelector('.gallery-grid');
 const filterBtns = document.querySelectorAll('.filter-btn');
@@ -38,6 +18,7 @@ const mobileMenu = document.querySelector('.mobile-menu');
 // 当前状态
 let currentPhotos = [];
 let currentIndex = 0;
+let displayedPhotos = []; // 当前显示的照片列表
 
 // 初始化
 async function init() {
@@ -58,12 +39,11 @@ async function loadPhotos() {
         if (res.ok) {
             currentPhotos = await res.json();
         } else {
-            console.warn('无法从 Supabase 加载，使用本地数据');
-            currentPhotos = localPhotos;
+            currentPhotos = [];
         }
     } catch (err) {
-        console.warn('加载失败，使用本地数据:', err);
-        currentPhotos = localPhotos;
+        console.warn('加载失败:', err);
+        currentPhotos = [];
     }
     
     renderGallery(currentPhotos);
@@ -72,6 +52,7 @@ async function loadPhotos() {
 // 渲染画廊
 function renderGallery(photoList) {
     galleryGrid.innerHTML = '';
+    displayedPhotos = photoList;
     
     if (photoList.length === 0) {
         galleryGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-secondary); padding: 4rem;">暂无作品</p>';
@@ -88,6 +69,7 @@ function renderGallery(photoList) {
             <div class="overlay">
                 <h3>${photo.title}</h3>
                 <p>${photo.description || ''}</p>
+                <span class="views-count">👁 ${photo.views || 0}</span>
             </div>
         `;
         
@@ -109,67 +91,123 @@ function getCategoryName(category) {
 
 // 过滤照片
 function filterPhotos(category) {
-    // 重新从 currentPhotos 过滤，而不是重新获取
     if (category === 'all') {
-        renderGallery(currentPhotos);
+        displayedPhotos = currentPhotos;
     } else {
-        const filtered = currentPhotos.filter(p => p.category === category);
-        renderGallery(filtered);
+        displayedPhotos = currentPhotos.filter(p => p.category === category);
     }
+    renderGallery(displayedPhotos);
 }
 
 // 灯箱
-function openLightbox(index) {
-    // 找到当前显示的照片列表中的索引对应的实际照片
-    const activeCategory = document.querySelector('.filter-btn.active')?.dataset.category || 'all';
-    const photoList = activeCategory === 'all' ? currentPhotos : currentPhotos.filter(p => p.category === activeCategory);
-    
+async function openLightbox(index) {
     currentIndex = index;
-    const photo = photoList[index];
+    const photo = displayedPhotos[index];
     
-    // 更新灯箱
-    const fullSrc = photo.src.replace('w=400', 'w=1200').replace('w=800', 'w=1200');
+    // 增加浏览次数
+    const newViews = (photo.views || 0) + 1;
+    try {
+        await fetch(`${SUPABASE_URL}/rest/v1/photos?id=eq.${photo.id}`, {
+            method: 'PATCH',
+            headers: {
+                'apikey': SUPABASE_KEY,
+                'Authorization': `Bearer ${SUPABASE_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ views: newViews })
+        });
+        // 更新本地数据
+        photo.views = newViews;
+    } catch (err) {
+        console.warn('更新浏览次数失败:', err);
+    }
+    
+    // 构建图片 URL
+    let fullSrc = photo.src;
+    if (photo.src.includes('unsplash.com')) {
+        fullSrc = photo.src.replace(/w=\d+/, 'w=1600');
+    }
+    
     lightboxImg.src = fullSrc;
     lightboxImg.alt = photo.title;
     lightboxTitle.textContent = photo.title;
     lightboxDesc.textContent = photo.description || '';
+    
+    // 显示详情面板
+    showPhotoDetails(photo);
     
     lightbox.classList.add('active');
     document.body.style.overflow = 'hidden';
 }
 
+function showPhotoDetails(photo) {
+    // 移除旧详情
+    const existingDetails = document.querySelector('.photo-details');
+    if (existingDetails) existingDetails.remove();
+    
+    // 解析 EXIF
+    let exifHtml = '';
+    if (photo.exif) {
+        const exif = typeof photo.exif === 'string' ? JSON.parse(photo.exif) : photo.exif;
+        exifHtml = `
+            <div class="detail-section">
+                <h4>📷 摄影参数</h4>
+                <div class="exif-grid">
+                    ${exif.camera ? `<div class="exif-item"><span>相机</span><span>${exif.camera}</span></div>` : ''}
+                    ${exif.lens ? `<div class="exif-item"><span>镜头</span><span>${exif.lens}</span></div>` : ''}
+                    ${exif.aperture ? `<div class="exif-item"><span>光圈</span><span>${exif.aperture}</span></div>` : ''}
+                    ${exif.shutter ? `<div class="exif-item"><span>快门</span><span>${exif.shutter}</span></div>` : ''}
+                    ${exif.iso ? `<div class="exif-item"><span>ISO</span><span>${exif.iso}</span></div>` : ''}
+                </div>
+            </div>
+        `;
+    }
+    
+    const details = document.createElement('div');
+    details.className = 'photo-details';
+    details.innerHTML = `
+        ${photo.location ? `<div class="detail-section"><h4>📍 拍摄地点</h4><p>${photo.location}</p></div>` : ''}
+        ${exifHtml}
+        ${photo.thoughts ? `<div class="detail-section"><h4>💭 摄影心得</h4><p>${photo.thoughts}</p></div>` : ''}
+        <div class="detail-section"><h4>👁 浏览次数</h4><p>${photo.views || 0} 次</p></div>
+    `;
+    
+    document.querySelector('.lightbox-caption').appendChild(details);
+}
+
 function closeLightbox() {
     lightbox.classList.remove('active');
     document.body.style.overflow = '';
+    
+    // 移除详情面板
+    const existingDetails = document.querySelector('.photo-details');
+    if (existingDetails) existingDetails.remove();
 }
 
 function updateLightbox() {
-    const activeCategory = document.querySelector('.filter-btn.active')?.dataset.category || 'all';
-    const photoList = activeCategory === 'all' ? currentPhotos : currentPhotos.filter(p => p.category === activeCategory);
-    const photo = photoList[currentIndex];
-    
+    const photo = displayedPhotos[currentIndex];
     if (!photo) return;
     
-    const fullSrc = photo.src.replace('w=400', 'w=1200').replace('w=800', 'w=1200');
+    let fullSrc = photo.src;
+    if (photo.src.includes('unsplash.com')) {
+        fullSrc = photo.src.replace(/w=\d+/, 'w=1600');
+    }
+    
     lightboxImg.src = fullSrc;
     lightboxImg.alt = photo.title;
     lightboxTitle.textContent = photo.title;
     lightboxDesc.textContent = photo.description || '';
+    
+    showPhotoDetails(photo);
 }
 
 function prevPhoto() {
-    const activeCategory = document.querySelector('.filter-btn.active')?.dataset.category || 'all';
-    const photoList = activeCategory === 'all' ? currentPhotos : currentPhotos.filter(p => p.category === activeCategory);
-    
-    currentIndex = (currentIndex - 1 + photoList.length) % photoList.length;
+    currentIndex = (currentIndex - 1 + displayedPhotos.length) % displayedPhotos.length;
     updateLightbox();
 }
 
 function nextPhoto() {
-    const activeCategory = document.querySelector('.filter-btn.active')?.dataset.category || 'all';
-    const photoList = activeCategory === 'all' ? currentPhotos : currentPhotos.filter(p => p.category === activeCategory);
-    
-    currentIndex = (currentIndex + 1) % photoList.length;
+    currentIndex = (currentIndex + 1) % displayedPhotos.length;
     updateLightbox();
 }
 
@@ -209,7 +247,6 @@ function setupEventListeners() {
         mobileMenu.classList.toggle('active');
     });
 
-    // 点击移动菜单链接后关闭菜单
     mobileMenu.querySelectorAll('a').forEach(link => {
         link.addEventListener('click', () => {
             mobileMenu.classList.remove('active');
