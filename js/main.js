@@ -1,5 +1,9 @@
-// 摄影作品数据
-const photos = [
+// Supabase 配置
+const SUPABASE_URL = 'https://sybgiwnksanuddwjeqkv.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN5Ymdpd25rc2FudWRkd2plcWt2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5NjczNjIsImV4cCI6MjA4OTU0MzM2Mn0.XOKk8sQxXknUlRKJtzp0wDPNjDDpkiz1YpoMdC6F6yE';
+
+// 照片数据（本地备用）
+const localPhotos = [
     {
         id: 1,
         title: "暮色北海道",
@@ -15,86 +19,6 @@ const photos = [
         category: "landscape",
         src: "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=800",
         thumb: "https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=400"
-    },
-    {
-        id: 3,
-        title: "雾中森林",
-        description: "清晨的森林迷雾",
-        category: "landscape",
-        src: "https://images.unsplash.com/photo-1448375240586-882707db888b?w=800",
-        thumb: "https://images.unsplash.com/photo-1448375240586-882707db888b?w=400"
-    },
-    {
-        id: 4,
-        title: "光的时刻",
-        description: "逆光人像摄影",
-        category: "portrait",
-        src: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=800",
-        thumb: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=400"
-    },
-    {
-        id: 5,
-        title: "眸",
-        description: "黑白人像",
-        category: "portrait",
-        src: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800",
-        thumb: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400"
-    },
-    {
-        id: 6,
-        title: "日常",
-        description: "生活中的瞬间",
-        category: "street",
-        src: "https://images.unsplash.com/photo-1517732306149-e8f829eb588a?w=800",
-        thumb: "https://images.unsplash.com/photo-1517732306149-e8f829eb588a?w=400"
-    },
-    {
-        id: 7,
-        title: "夜色",
-        description: "霓虹灯下的城市",
-        category: "street",
-        src: "https://images.unsplash.com/photo-1519608487953-e999c86e7455?w=800",
-        thumb: "https://images.unsplash.com/photo-1519608487953-e999c86e7455?w=400"
-    },
-    {
-        id: 8,
-        title: "细节之美",
-        description: "建筑细节",
-        category: "detail",
-        src: "https://images.unsplash.com/photo-1518005020951-eccb494ad742?w=800",
-        thumb: "https://images.unsplash.com/photo-1518005020951-eccb494ad742?w=400"
-    },
-    {
-        id: 9,
-        title: "静物",
-        description: "器物之美",
-        category: "detail",
-        src: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800",
-        thumb: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400"
-    },
-    {
-        id: 10,
-        title: "山川",
-        description: "日出时的山脉",
-        category: "landscape",
-        src: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800",
-        thumb: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=400"
-    },
-    {
-        id: 11,
-        title: "海岸线",
-        description: "海浪与岩石",
-        category: "landscape",
-        src: "https://images.unsplash.com/photo-1505142468610-359e7d316be0?w=800",
-        thumb: "https://images.unsplash.com/photo-1505142468610-359e7d316be0?w=400"
-    },
-    {
-        id: 12,
-        title: "情绪",
-        description: "室内人像",
-        category: "portrait",
-        src: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=800",
-        thumb: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400"
     }
 ];
 
@@ -112,29 +36,58 @@ const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
 const mobileMenu = document.querySelector('.mobile-menu');
 
 // 当前状态
-let currentPhotos = [...photos];
+let currentPhotos = [];
 let currentIndex = 0;
 
 // 初始化
-function init() {
-    renderGallery(photos);
+async function init() {
+    await loadPhotos();
     setupEventListeners();
+}
+
+// 从 Supabase 加载照片
+async function loadPhotos() {
+    try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/photos?order=created_at.desc`, {
+            headers: {
+                'apikey': SUPABASE_KEY,
+                'Authorization': `Bearer ${SUPABASE_KEY}`
+            }
+        });
+        
+        if (res.ok) {
+            currentPhotos = await res.json();
+        } else {
+            console.warn('无法从 Supabase 加载，使用本地数据');
+            currentPhotos = localPhotos;
+        }
+    } catch (err) {
+        console.warn('加载失败，使用本地数据:', err);
+        currentPhotos = localPhotos;
+    }
+    
+    renderGallery(currentPhotos);
 }
 
 // 渲染画廊
 function renderGallery(photoList) {
     galleryGrid.innerHTML = '';
     
+    if (photoList.length === 0) {
+        galleryGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-secondary); padding: 4rem;">暂无作品</p>';
+        return;
+    }
+    
     photoList.forEach((photo, index) => {
         const item = document.createElement('div');
         item.className = 'gallery-item';
         item.style.animationDelay = `${index * 0.05}s`;
         item.innerHTML = `
-            <img src="${photo.thumb}" alt="${photo.title}" loading="lazy">
+            <img src="${photo.thumb || photo.src}" alt="${photo.title}" loading="lazy">
             <span class="category-tag">${getCategoryName(photo.category)}</span>
             <div class="overlay">
                 <h3>${photo.title}</h3>
-                <p>${photo.description}</p>
+                <p>${photo.description || ''}</p>
             </div>
         `;
         
@@ -156,18 +109,31 @@ function getCategoryName(category) {
 
 // 过滤照片
 function filterPhotos(category) {
+    // 重新从 currentPhotos 过滤，而不是重新获取
     if (category === 'all') {
-        currentPhotos = [...photos];
+        renderGallery(currentPhotos);
     } else {
-        currentPhotos = photos.filter(p => p.category === category);
+        const filtered = currentPhotos.filter(p => p.category === category);
+        renderGallery(filtered);
     }
-    renderGallery(currentPhotos);
 }
 
 // 灯箱
 function openLightbox(index) {
+    // 找到当前显示的照片列表中的索引对应的实际照片
+    const activeCategory = document.querySelector('.filter-btn.active')?.dataset.category || 'all';
+    const photoList = activeCategory === 'all' ? currentPhotos : currentPhotos.filter(p => p.category === activeCategory);
+    
     currentIndex = index;
-    updateLightbox();
+    const photo = photoList[index];
+    
+    // 更新灯箱
+    const fullSrc = photo.src.replace('w=400', 'w=1200').replace('w=800', 'w=1200');
+    lightboxImg.src = fullSrc;
+    lightboxImg.alt = photo.title;
+    lightboxTitle.textContent = photo.title;
+    lightboxDesc.textContent = photo.description || '';
+    
     lightbox.classList.add('active');
     document.body.style.overflow = 'hidden';
 }
@@ -178,20 +144,32 @@ function closeLightbox() {
 }
 
 function updateLightbox() {
-    const photo = currentPhotos[currentIndex];
-    lightboxImg.src = photo.src.replace('w=400', 'w=1200').replace('w=800', 'w=1200');
+    const activeCategory = document.querySelector('.filter-btn.active')?.dataset.category || 'all';
+    const photoList = activeCategory === 'all' ? currentPhotos : currentPhotos.filter(p => p.category === activeCategory);
+    const photo = photoList[currentIndex];
+    
+    if (!photo) return;
+    
+    const fullSrc = photo.src.replace('w=400', 'w=1200').replace('w=800', 'w=1200');
+    lightboxImg.src = fullSrc;
     lightboxImg.alt = photo.title;
     lightboxTitle.textContent = photo.title;
-    lightboxDesc.textContent = photo.description;
+    lightboxDesc.textContent = photo.description || '';
 }
 
 function prevPhoto() {
-    currentIndex = (currentIndex - 1 + currentPhotos.length) % currentPhotos.length;
+    const activeCategory = document.querySelector('.filter-btn.active')?.dataset.category || 'all';
+    const photoList = activeCategory === 'all' ? currentPhotos : currentPhotos.filter(p => p.category === activeCategory);
+    
+    currentIndex = (currentIndex - 1 + photoList.length) % photoList.length;
     updateLightbox();
 }
 
 function nextPhoto() {
-    currentIndex = (currentIndex + 1) % currentPhotos.length;
+    const activeCategory = document.querySelector('.filter-btn.active')?.dataset.category || 'all';
+    const photoList = activeCategory === 'all' ? currentPhotos : currentPhotos.filter(p => p.category === activeCategory);
+    
+    currentIndex = (currentIndex + 1) % photoList.length;
     updateLightbox();
 }
 
