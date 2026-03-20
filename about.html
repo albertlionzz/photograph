@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>关于 | 光影记</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600&family=Cormorant+Garamond:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .page-content {
+            max-width: 800px;
+            margin: 120px auto 4rem;
+            padding: 0 2rem;
+        }
+        
+        .about-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+        
+        .about-header h1 {
+            font-family: var(--font-en);
+            font-size: 3rem;
+            font-weight: 300;
+            margin-bottom: 1rem;
+            letter-spacing: 0.1em;
+        }
+        
+        .about-header .subtitle {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            font-family: var(--font-en);
+        }
+        
+        .about-body {
+            display: grid;
+            gap: 3rem;
+        }
+        
+        .about-section h2 {
+            font-family: var(--font-en);
+            font-size: 1.5rem;
+            font-weight: 400;
+            margin-bottom: 1.5rem;
+            color: var(--accent);
+        }
+        
+        .about-section p {
+            color: var(--text-secondary);
+            line-height: 1.8;
+            margin-bottom: 1rem;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin: 3rem 0;
+            padding: 2rem 0;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-family: var(--font-en);
+            font-size: 2.5rem;
+            font-weight: 300;
+            color: var(--accent);
+            display: block;
+        }
+        
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+        
+        .gear-list {
+            display: grid;
+            gap: 1rem;
+        }
+        
+        .gear-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem;
+            background: var(--bg-card);
+            border-radius: 4px;
+        }
+        
+        .gear-item span:first-child {
+            color: var(--text-primary);
+        }
+        
+        .gear-item span:last-child {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .about-header h1 {
+                font-size: 2rem;
+            }
+            
+            .stats {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航 -->
+    <nav class="nav">
+        <div class="nav-inner">
+            <a href="index.html" class="logo">光影记</a>
+            <ul class="nav-links">
+                <li><a href="index.html">作品</a></li>
+                <li><a href="about.html" class="active">关于</a></li>
+                <li><a href="contact.html">联系</a></li>
+            </ul>
+            <button class="mobile-menu-btn" aria-label="菜单">
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- 移动端菜单 -->
+    <div class="mobile-menu">
+        <a href="index.html">作品</a>
+        <a href="about.html">关于</a>
+        <a href="contact.html">联系</a>
+    </div>
+
+    <!-- 内容 -->
+    <div class="page-content">
+        <header class="about-header">
+            <h1>ABOUT</h1>
+            <p class="subtitle">用光影记录世界的美好瞬间</p>
+        </header>
+        
+        <div class="about-body">
+            <section class="about-section">
+                <h2>关于我</h2>
+                <p>
+                    我是一名热爱摄影的创作者相信每张照片都有其独特的语言。
+                    摄影对我而言不仅仅是记录，更是一种表达世界的方式。
+                </p>
+                <p>
+                    我喜欢在平凡的生活中发现不平凡的美，
+                    用镜头捕捉那些稍纵即逝的光影时刻。
+                    无论是城市的喧嚣，还是自然的宁静，
+                    我都在寻找那些能够触动人心的瞬间。
+                </p>
+            </section>
+            
+            <div class="stats">
+                <div class="stat-item">
+                    <span class="stat-number">12+</span>
+                    <span class="stat-label">年拍摄经验</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">500+</span>
+                    <span class="stat-label">完成项目</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">30+</span>
+                    <span class="stat-label">获奖作品</span>
+                </div>
+            </div>
+            
+            <section class="about-section">
+                <h2>常用器材</h2>
+                <div class="gear-list">
+                    <div class="gear-item">
+                        <span>Sony A7R IV</span>
+                        <span>机身</span>
+                    </div>
+                    <div class="gear-item">
+                        <span>Sony 24-70mm f/2.8 GM</span>
+                        <span>标准变焦</span>
+                    </div>
+                    <div class="gear-item">
+                        <span>Sony 70-200mm f/2.8 GM</span>
+                        <span>远摄变焦</span>
+                    </div>
+                    <div class="gear-item">
+                        <span>Sony 35mm f/1.4 GM</span>
+                        <span>定焦</span>
+                    </div>
+                    <div class="gear-item">
+                        <span>DJI Mavic 3</span>
+                        <span>航拍</span>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="about-section">
+                <h2>拍摄风格</h2>
+                <p>
+                    我倾向于简洁、真实的风格不过度后期，追求自然光线的运用。
+                    相信最好的照片往往是在最恰当的时刻按下快门的结果。
+                </p>
+                <p>
+                    擅长风光、人像和街头摄影，
+                    注重画面构图与情绪的表达。
+                </p>
+            </section>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <p>&copy; 2026 光影记 Photography. All rights reserved.</p>
+        <div class="social-links">
+            <a href="#" target="_blank">Instagram</a>
+            <a href="#" target="_blank">500px</a>
+            <a href="mailto:hello@example.com">Email</a>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+</body>
+</html>

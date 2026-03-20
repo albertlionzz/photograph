@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>联系 | 光影记</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600&family=Cormorant+Garamond:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .page-content {
+            max-width: 800px;
+            margin: 120px auto 4rem;
+            padding: 0 2rem;
+        }
+        
+        .contact-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+        
+        .contact-header h1 {
+            font-family: var(--font-en);
+            font-size: 3rem;
+            font-weight: 300;
+            margin-bottom: 1rem;
+            letter-spacing: 0.1em;
+        }
+        
+        .contact-header p {
+            font-size: 1rem;
+            color: var(--text-secondary);
+        }
+        
+        .contact-grid {
+            display: grid;
+            gap: 3rem;
+        }
+        
+        .contact-methods {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .contact-card {
+            background: var(--bg-card);
+            padding: 2rem;
+            border-radius: 8px;
+            text-align: center;
+            transition: transform var(--transition), box-shadow var(--transition);
+        }
+        
+        .contact-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .contact-card .icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+        
+        .contact-card h3 {
+            font-family: var(--font-en);
+            font-size: 1.2rem;
+            font-weight: 400;
+            margin-bottom: 0.5rem;
+        }
+        
+        .contact-card p,
+        .contact-card a {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        
+        .contact-card a:hover {
+            color: var(--accent);
+        }
+        
+        .contact-form {
+            background: var(--bg-card);
+            padding: 2.5rem;
+            border-radius: 8px;
+        }
+        
+        .contact-form h2 {
+            font-family: var(--font-en);
+            font-size: 1.5rem;
+            font-weight: 400;
+            margin-bottom: 2rem;
+            color: var(--accent);
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 1rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 1rem;
+            transition: border-color var(--transition);
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        
+        .form-group textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+        
+        .submit-btn {
+            width: 100%;
+            padding: 1rem 2rem;
+            background: var(--accent);
+            color: var(--bg-primary);
+            font-size: 1rem;
+            border-radius: 4px;
+            transition: background var(--transition);
+        }
+        
+        .submit-btn:hover {
+            background: var(--accent-hover);
+        }
+        
+        .note {
+            margin-top: 1rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-align: center;
+        }
+        
+        @media (max-width: 768px) {
+            .contact-header h1 {
+                font-size: 2rem;
+            }
+            
+            .contact-form {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航 -->
+    <nav class="nav">
+        <div class="nav-inner">
+            <a href="index.html" class="logo">光影记</a>
+            <ul class="nav-links">
+                <li><a href="index.html">作品</a></li>
+                <li><a href="about.html">关于</a></li>
+                <li><a href="contact.html" class="active">联系</a></li>
+            </ul>
+            <button class="mobile-menu-btn" aria-label="菜单">
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- 移动端菜单 -->
+    <div class="mobile-menu">
+        <a href="index.html">作品</a>
+        <a href="about.html">关于</a>
+        <a href="contact.html">联系</a>
+    </div>
+
+    <!-- 内容 -->
+    <div class="page-content">
+        <header class="contact-header">
+            <h1>CONTACT</h1>
+            <p>如有合作意向或其他事宜，欢迎联系</p>
+        </header>
+        
+        <div class="contact-grid">
+            <!-- 联系方式 -->
+            <div class="contact-methods">
+                <div class="contact-card">
+                    <span class="icon">📧</span>
+                    <h3>邮箱</h3>
+                    <a href="mailto:hello@example.com">hello@example.com</a>
+                </div>
+                <div class="contact-card">
+                    <span class="icon">📱</span>
+                    <h3>微信</h3>
+                    <p>WeChat ID: photo_2026</p>
+                </div>
+                <div class="contact-card">
+                    <span class="icon">📷</span>
+                    <h3>Instagram</h3>
+                    <a href="https://instagram.com" target="_blank">@yourhandle</a>
+                </div>
+            </div>
+            
+            <!-- 联系表单 -->
+            <div class="contact-form">
+                <h2>发送消息</h2>
+                <form id="contactForm">
+                    <div class="form-group">
+                        <label for="name">姓名</label>
+                        <input type="text" id="name" name="name" required placeholder="你的名字">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">邮箱</label>
+                        <input type="email" id="email" name="email" required placeholder="your@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="message">留言</label>
+                        <textarea id="message" name="message" required placeholder="写下你想说的话..."></textarea>
+                    </div>
+                    <button type="submit" class="submit-btn">发送消息</button>
+                    <p class="note">* 此表单为演示版本，实际发送需要配置后端服务</p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <p>&copy; 2026 光影记 Photography. All rights reserved.</p>
+        <div class="social-links">
+            <a href="#" target="_blank">Instagram

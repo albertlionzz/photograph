@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>光影记 | Photography Portfolio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600&family=Cormorant+Garamond:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- 导航 -->
+    <nav class="nav">
+        <div class="nav-inner">
+            <a href="index.html" class="logo">光影记</a>
+            <ul class="nav-links">
+                <li><a href="index.html" class="active">作品</a></li>
+                <li><a href="about.html">关于</a></li>
+                <li><a href="contact.html">联系</a></li>
+            </ul>
+            <button class="mobile-menu-btn" aria-label="菜单">
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- 移动端菜单 -->
+    <div class="mobile-menu">
+        <a href="index.html">作品</a>
+        <a href="about.html">关于</a>
+        <a href="contact.html">联系</a>
+    </div>
+
+    <!-- 过滤器 -->
+    <div class="filters">
+        <button class="filter-btn active" data-category="all">全部</button>
+        <button class="filter-btn" data-category="landscape">风景</button>
+        <button class="filter-btn" data-category="portrait">人像</button>
+        <button class="filter-btn" data-category="street">街拍</button>
+        <button class="filter-btn" data-category="detail">细节</button>
+    </div>
+
+    <!-- 画廊 -->
+    <main class="gallery">
+        <div class="gallery-grid">
+            <!-- 作品由 JS 动态生成 -->
+        </div>
+    </main>
+
+    <!-- 灯箱 -->
+    <div class="lightbox" id="lightbox">
+        <button class="lightbox-close" aria-label="关闭">&times;</button>
+        <button class="lightbox-prev" aria-label="上一张">&#10094;</button>
+        <button class="lightbox-next" aria-label="下一张">&#10095;</button>
+        <div class="lightbox-content">
+            <img src="" alt="" id="lightbox-img">
+        </div>
+        <div class="lightbox-caption">
+            <h3 id="lightbox-title"></h3>
+            <p id="lightbox-desc"></p>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <p>&copy; 2026 光影记 Photography. All rights reserved.</p>
+        <div class="social-links">
+            <a href="#" target="_blank">Instagram</a>
+            <a href="#" target="_blank">500px</a>
+            <a href="mailto:hello@example.com">Email</a>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+</body>
+</html>
